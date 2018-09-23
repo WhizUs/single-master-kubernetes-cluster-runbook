@@ -1,12 +1,11 @@
 # Kubernetes Cluster Installation
 
-Using terraform and ansible this example installs a kubernetes cluster following
-this description: https://coreos.com/kubernetes/docs/1.6.1/getting-started.html
+Using terraform and ansible to install a high availability kubernetes cluster followed this instruction: https://kubernetes.io/docs/setup/independent/high-availability/
 
 ## Prerequisites
 
-* Terraform version 10.8+ installed
-* configured cloudstack terraform provider
+* Terraform version v0.11.8 (other version may work as well, but not tested)
+* Configured cloudstack terraform provider - [Cloudstack Provider Configuration](#cloudstack-provider-configuration)
 
 ## Run example
 
