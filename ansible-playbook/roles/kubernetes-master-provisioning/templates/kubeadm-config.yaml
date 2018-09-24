@@ -1,0 +1,19 @@
+apiVersion: kubeadm.k8s.io/v1alpha2
+kind: MasterConfiguration
+kubernetesVersion: v1.11.0
+apiServerCertSANs:
+- "{{inventory_hostname}}"
+api:
+    controlPlaneEndpoint: "{{inventory_hostname}}:6443"
+etcd:
+    external:
+        endpoints:
+        - https://{{groups.etcd_nodes[0]}}:2379
+        - https://{{groups.etcd_nodes[1]}}:2379
+        - https://{{groups.etcd_nodes[2]}}:2379
+        caFile: /etc/kubernetes/pki/etcd/ca.crt
+        certFile: /etc/kubernetes/pki/apiserver-etcd-client0{{groups.etcd_nodes[0]}}.crt
+        keyFile: /etc/kubernetes/pki/apiserver-etcd-client0{{groups.etcd_nodes[0]}}.key
+networking:
+    # This CIDR is a calico default. Substitute or remove for your CNI provider.
+    podSubnet: "192.168.0.0/16"

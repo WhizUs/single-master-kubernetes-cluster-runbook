@@ -5,3 +5,4 @@
   become_method: sudo
   roles:
     - kubernetes-node-init-setup
+    - kubernetes-master-provisioning

@@ -1,0 +1,4 @@
+- name: deploy kubeadm config to tmp folder
+  template: src=kubeadm-config.yaml dest=/tmp/kubeadm-config.yaml
+- name: run kubeadm init
+  command: kubeadm init --config=/tmp/kubeadm-config.yaml creates=/etc/kubernetes/manifests/kube-apiserver.yaml

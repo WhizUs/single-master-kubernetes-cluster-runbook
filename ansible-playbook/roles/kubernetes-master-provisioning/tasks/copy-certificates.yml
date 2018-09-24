@@ -1,23 +1,26 @@
-- name: Create directory that contains the certificates
-  file: path=/etc/kubernetes/ssl/ state=directory mode=0755
-- name: Copy local ca certificate to kubernetes master
+
+- name: create directory that contains the ca certificate and key
+  file: path=/etc/kubernetes/pki/etcd/ state=directory mode=0755
+- name: copy ca cert to master nodes
   copy:
-    src: /Users/erik/Programming/terraform/kubernetes-cluster-runbook/certs/ca.pem
-    dest: /etc/kubernetes/ssl/ca.pem
+    src: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/ca.crt
+    dest: /etc/kubernetes/pki/etcd/ca.crt
     mode: 0600
     owner: root
     group: root
-- name: Copy local apiserver certificate to kubernetes master
+- name: copy etcd certificates to master nodes
   copy:
-    src: /Users/erik/Programming/terraform/kubernetes-cluster-runbook/certs/apiserver.pem
-    dest: /etc/kubernetes/ssl/apiserver.pem
+    src: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/apiserver-etcd-client.crt/{{item}}/etc/kubernetes/pki/apiserver-etcd-client.crt
+    dest: /etc/kubernetes/pki/apiserver-etcd-client0{{item}}.crt
     mode: 0600
     owner: root
     group: root
-- name: Copy local apiserver key certificates to kubernetes master
+  with_items: "{{ groups.etcd_nodes }}"
+- name: copy etcd keys to master nodes
   copy:
-    src: /Users/erik/Programming/terraform/kubernetes-cluster-runbook/certs/apiserver-key.pem
-    dest: /etc/kubernetes/ssl/apiserver-key.pem
+    src: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/apiserver-etcd-client.key/{{item}}/etc/kubernetes/pki/apiserver-etcd-client.key
+    dest: /etc/kubernetes/pki/apiserver-etcd-client0{{item}}.key
     mode: 0600
     owner: root
     group: root
+  with_items: "{{ groups.etcd_nodes }}"
