@@ -116,12 +116,12 @@ data "template_file" "ansible-inventory" {
   template = "${file("ansible-inventory.tpl")}"
 
   vars {
-    kubernetes_master_node00_ip = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[0]}"
-    kubernetes_master_node01_ip = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[1]}"
-    kubernetes_master_node02_ip = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[2]}"
-    kubernetes_worker_node00_ip = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[0]}"
-    kubernetes_worker_node01_ip = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[1]}"
-    kubernetes_worker_node02_ip = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[2]}"
+    kubernetes_master_node00_ip = "${cloudstack_instance.kubernetes-master-nodes.*.ip_address[0]}"
+    kubernetes_master_node01_ip = "${cloudstack_instance.kubernetes-master-nodes.*.ip_address[1]}"
+    kubernetes_master_node02_ip = "${cloudstack_instance.kubernetes-master-nodes.*.ip_address[2]}"
+    kubernetes_worker_node00_ip = "${cloudstack_instance.kubernetes-worker-nodes.*.ip_address[0]}"
+    kubernetes_worker_node01_ip = "${cloudstack_instance.kubernetes-worker-nodes.*.ip_address[1]}"
+    kubernetes_worker_node02_ip = "${cloudstack_instance.kubernetes-worker-nodes.*.ip_address[2]}"
     etcd_node00_ip              = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[0]}"
     etcd_node01_ip              = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[1]}"
     etcd_node02_ip              = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[2]}"
