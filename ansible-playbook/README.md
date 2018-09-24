@@ -12,7 +12,6 @@ After the infrastructure was created by terraform, the virtual machines are prov
 ## Run this example
 After successful setup your playbook, you just need to run following command to start the deployment
 
-     ansible-playbook ./ansible-setup.yml -i ../inventory
      ansible-playbook ./etcd-provisioning.yml -i ../inventory
      ansible-playbook ./kubernetes-master-provisioning.yml -i ../inventory
      ansible-playbook ./kubernetes-worker-provisioning.yml -i ../inventory
@@ -30,7 +29,6 @@ look like:
 
 ## Resources
 
-To setup coreOS for ansible, the playbook etcd-ansible-setup installs python. Therfore
-we use following github snippet from judexzhu:
+We use this official guide to setup the high available kubernetes cluster:
 
-    https://raw.githubusercontent.com/judexzhu/Install-Python-on-CoreOs/master/install-python.sh
+    https://kubernetes.io/docs/setup/independent/high-availability/

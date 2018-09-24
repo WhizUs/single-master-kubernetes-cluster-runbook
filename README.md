@@ -30,8 +30,6 @@ Before contribution run
       terraform fmt
       terraform validate -var-file='./exoscale.tfvars'
 
-to run
-
 ## Clean up
 
-terraform destroy -parallelism=10 -var-file='./exoscale.tfvars'
+      terraform destroy -parallelism=10 -var-file='./exoscale.tfvars'
