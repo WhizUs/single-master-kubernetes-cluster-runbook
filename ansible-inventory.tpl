@@ -1,15 +1,19 @@
 [default]
 
 [etcd_nodes]
+${etcd_node00_ip}
 ${etcd_node01_ip}
+${etcd_node02_ip}
 
 [kubernetes_master]
+${kubernetes_master_node00_ip}
 ${kubernetes_master_node01_ip}
+${kubernetes_master_node02_ip}
 
 [kubernetes_nodes]
+${kubernetes_worker_node00_ip}
 ${kubernetes_worker_node01_ip}
 ${kubernetes_worker_node02_ip}
-${kubernetes_worker_node03_ip}
 
 [etcd_nodes:vars]
 ansible_user=core
