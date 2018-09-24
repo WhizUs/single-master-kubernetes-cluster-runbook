@@ -1,0 +1,16 @@
+apiVersion: "kubeadm.k8s.io/v1alpha2"
+kind: MasterConfiguration
+etcd:
+    local:
+        serverCertSANs:
+        - "{{inventory_hostname}}"
+        peerCertSANs:
+        - "{{inventory_hostname}}"
+        extraArgs:
+            initial-cluster: infra0=https://{{groups.etcd_nodes[0]}}:2380,infra1=https://{{groups.etcd_nodes[1]}}:2380,infra2=https://{{groups.etcd_nodes[2]}}:2380
+            initial-cluster-state: new
+            name: "infra{{groups.etcd_nodes.index(inventory_hostname)}}"
+            listen-peer-urls: https://{{inventory_hostname}}:2380
+            listen-client-urls: https://{{inventory_hostname}}:2379
+            advertise-client-urls: https://{{inventory_hostname}}:2379
+            initial-advertise-peer-urls: https://{{inventory_hostname}}:2380

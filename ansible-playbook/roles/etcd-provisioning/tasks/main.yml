@@ -1,4 +1,6 @@
 ---
-  - include_tasks: deploy-config.yml
-  - include_tasks: start-etcd.yml
-  - include_tasks: configure-flannel-network.yml
+  - include_tasks: deploy-etcd-service-config.yml
+  - include_tasks: deploy-kubeadm-config.yml
+  - include_tasks: copy-ca.yml
+  - include_tasks: generate-node-certificates.yml
+  - include_tasks: create-manifest.yml

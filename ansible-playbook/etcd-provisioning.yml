@@ -4,4 +4,5 @@
   become_user: root
   become_method: sudo
   roles:
+    - kubernetes-node-init-setup
     - etcd-provisioning

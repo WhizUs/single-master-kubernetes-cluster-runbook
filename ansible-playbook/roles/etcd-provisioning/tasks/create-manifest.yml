@@ -1,0 +1,2 @@
+- name: generate etcd-server certifcate
+  command: kubeadm alpha phase etcd local --config=/tmp/kubeadmcfg.yaml creates=/etc/kubernetes/manifests/etcd.yaml

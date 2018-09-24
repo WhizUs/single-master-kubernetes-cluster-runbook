@@ -1,0 +1,16 @@
+- name: create directory that contains the ca certificate and key
+  file: path=/etc/kubernetes/pki/etcd/ state=directory mode=0755
+- name: Copy local ca certificate to node
+  copy:
+    src: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/ca.crt
+    dest: /etc/kubernetes/pki/etcd/ca.crt
+    mode: 0600
+    owner: root
+    group: root
+- name: Copy local ca key to node
+  copy:
+    src: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/ca.key
+    dest: /etc/kubernetes/pki/etcd/ca.key
+    mode: 0600
+    owner: root
+    group: root
