@@ -1,2 +1,0 @@
-- name: Deploy kube-scheduler manifest
-  template: src=kube-scheduler.yaml dest=/etc/kubernetes/manifests/kube-scheduler.yaml

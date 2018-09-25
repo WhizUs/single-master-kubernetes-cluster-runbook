@@ -1,4 +1,0 @@
-- name: restart flanneld
-  systemd:
-    name: flanneld
-    state: started
