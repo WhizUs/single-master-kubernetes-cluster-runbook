@@ -2,3 +2,5 @@
   - include_tasks: copy-certificates.yml
   - include_tasks: deploy-kubeadm-config.yml
   - include_tasks: install-calcio.yml
+  - include_tasks: save-join-command-locally.yml
+

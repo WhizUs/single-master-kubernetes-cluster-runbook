@@ -1,0 +1,6 @@
+- name: get join command from master node
+  shell: echo "$(kubeadm token create --print-join-command)" >> /tmp/print-join-command.sh
+- name: save join command file in local tmp folder
+  fetch:
+    src: /tmp/print-join-command.sh
+    dest: /tmp/print-join-command.sh

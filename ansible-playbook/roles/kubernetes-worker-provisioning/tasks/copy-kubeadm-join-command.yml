@@ -1,0 +1,7 @@
+- name: copy kubeadm join command to worker node
+  copy:
+    src: /tmp/print-join-command.sh/{{ groups.kubernetes_master | first }}/tmp/print-join-command.sh
+    dest: /tmp/print-join-command.sh
+    mode: 0600
+    owner: root
+    group: root

@@ -1,2 +1,0 @@
-- name: Create Kublet Unit in systemd
-  template: src=kubelet.service dest=/etc/systemd/system/kubelet.service

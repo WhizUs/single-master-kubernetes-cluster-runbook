@@ -1,0 +1,2 @@
+- name: connect worker to master node
+  command: sh /tmp/print-join-command.sh
