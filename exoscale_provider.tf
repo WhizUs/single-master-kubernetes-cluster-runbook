@@ -1,5 +1,4 @@
-provider "cloudstack" {
-  api_url    = "${var.cloudstack_api_url}"
-  api_key    = "${var.cloudstack_api_key}"
-  secret_key = "${var.cloudstack_secret_key}"
+provider "exoscale" {
+  key    = "${var.exoscale_api_key}"
+  secret = "${var.exoscale_secret_key}"
 }

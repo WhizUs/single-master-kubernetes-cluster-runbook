@@ -1,11 +1,7 @@
-variable "cloudstack_api_url" {
+variable "exoscale_api_key" {
   type = "string"
 }
 
-variable "cloudstack_api_key" {
-  type = "string"
-}
-
-variable "cloudstack_secret_key" {
+variable "exoscale_secret_key" {
   type = "string"
 }

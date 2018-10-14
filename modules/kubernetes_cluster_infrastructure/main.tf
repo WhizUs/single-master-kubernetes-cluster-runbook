@@ -1,114 +1,154 @@
-resource "cloudstack_ssh_keypair" "kubernetes-cluster-ssh-key" {
+resource "exoscale_ssh_keypair" "kubernetes-cluster-ssh-key" {
   name       = "kubernetes-cluster-ssh-key"
   public_key = "${file("~/.ssh/id_rsa.pub")}"
 }
 
+# Create security group for ssh access nodes
+resource "exoscale_security_group" "kubernetes-cluster-ssh-access-security-group" {
+  name        = "kubernetes-cluster-ssh-access-security-group"
+  description = "Security Group for ssh access."
+}
+
 # Create security group for master nodes
-resource "cloudstack_security_group" "kubernetes-master-nodes-security-group" {
+resource "exoscale_security_group" "kubernetes-master-nodes-security-group" {
   name        = "kubernetes-master-nodes-security-group"
   description = "Security Group for kubernetes master nodes."
 }
 
 # Create a security group for worker nodes
-resource "cloudstack_security_group" "kubernetes-worker-nodes-security-group" {
+resource "exoscale_security_group" "kubernetes-worker-nodes-security-group" {
   name        = "kubernetes-worker-nodes-security-group"
   description = "Security Group for kubernetes worker nodes."
 }
 
 # Create a security group for etcd nodes
-resource "cloudstack_security_group" "etcd-nodes-security-group" {
+resource "exoscale_security_group" "etcd-nodes-security-group" {
   name        = "etcd-nodes-security-group"
   description = "Allow access to etcd nodes."
 }
 
+resource "exoscale_security_group_rule" "kubernetes-cluster-ssh-access-security-group-nodeports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.id}"
+  protocol          = "TCP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 22
+  end_port          = 22
+}
+
 # Check ports are needed for master nodes: 
 # https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-resource "cloudstack_security_group_rule" "kubernetes-master-nodes-security-group-rules" {
-  security_group_id = "${cloudstack_security_group.kubernetes-master-nodes-security-group.id}"
+resource "exoscale_security_group_rule" "kubernetes-master-nodes-security-group-api-server" {
+  security_group_id = "${exoscale_security_group.kubernetes-master-nodes-security-group.id}"
+  protocol          = "TCP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 6443
+  end_port          = 6443
+}
 
-  rule {
-    cidr_list = ["0.0.0.0/0"]
-    protocol  = "tcp"
-    ports     = ["6443", "10250", "10251", "10252"]
-  }
-
-  rule {
-    cidr_list = ["0.0.0.0/0"]
-    protocol  = "tcp"
-    ports     = ["22"]
-  }
+# Check ports are needed for master nodes: 
+# https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
+resource "exoscale_security_group_rule" "kubernetes-master-nodes-security-group-master-services" {
+  security_group_id = "${exoscale_security_group.kubernetes-master-nodes-security-group.id}"
+  protocol          = "TCP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 10250
+  end_port          = 10252
 }
 
 # Check ports are needed for worker nodes: 
 # https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-resource "cloudstack_security_group_rule" "kubernetes-worker-nodes-security-group-rules" {
-  security_group_id = "${cloudstack_security_group.kubernetes-worker-nodes-security-group.id}"
-
-  rule {
-    cidr_list = ["0.0.0.0/0"]
-    protocol  = "tcp"
-    ports     = ["10250", "30000-32767"]
-  }
-
-  rule {
-    cidr_list = ["0.0.0.0/0"]
-    protocol  = "tcp"
-    ports     = ["22"]
-  }
+resource "exoscale_security_group_rule" "kubernetes-worker-nodes-security-group-kubelet-api" {
+  security_group_id = "${exoscale_security_group.kubernetes-worker-nodes-security-group.id}"
+  protocol          = "TCP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 10250
+  end_port          = 10250
 }
 
-# Check ports are needed for etcd: 
+# Check ports are needed for worker nodes: 
 # https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-resource "cloudstack_security_group_rule" "etcd-nodes-security-group-rules" {
-  security_group_id = "${cloudstack_security_group.etcd-nodes-security-group.id}"
+resource "exoscale_security_group_rule" "kubernetes-worker-nodes-security-group-nodeports" {
+  security_group_id = "${exoscale_security_group.kubernetes-worker-nodes-security-group.id}"
+  protocol          = "TCP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 30000
+  end_port          = 32767
+}
 
-  rule {
-    cidr_list = ["0.0.0.0/0"]
-    protocol  = "tcp"
-    ports     = ["2379-2380"]
-  }
-
-  rule {
-    cidr_list = ["0.0.0.0/0"]
-    protocol  = "tcp"
-    ports     = ["22"]
-  }
+# Check ports are needed for etcd nodes: 
+# https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
+resource "exoscale_security_group_rule" "etcd-nodes-security-group-client-api" {
+  security_group_id = "${exoscale_security_group.etcd-nodes-security-group.id}"
+  protocol          = "TCP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 2379
+  end_port          = 2380
 }
 
 # Create 3 Kubernetes master nodes (using ubuntu template)
-resource "cloudstack_instance" "kubernetes-master-nodes" {
-  name               = "kubernetes-master-node0${count.index}"
-  template           = "4c9f5519-730f-46cb-b292-4e73ca578947"
-  service_offering   = "Small"
-  root_disk_size     = 20
-  zone               = "at-vie-1"
-  security_group_ids = ["${cloudstack_security_group.kubernetes-master-nodes-security-group.id}"]
-  keypair            = "${cloudstack_ssh_keypair.kubernetes-cluster-ssh-key.id}"
-  count              = 3
+resource "exoscale_compute" "kubernetes-master-nodes" {
+  display_name    = "kubernetes-master-node0${count.index}"
+  zone            = "at-vie-1"
+  template        = "Linux Ubuntu 18.04 LTS 64-bit"
+  size            = "Small"
+  disk_size       = 20
+  ip6             = false
+  key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-ssh-key.id}"
+  security_groups = ["${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.name}", "${exoscale_security_group.kubernetes-master-nodes-security-group.name}"]
+  state           = "Running"
+
+  tags {
+    env                = "production"
+    kubernetes-cluster = "kubernetes-master"
+  }
+
+  count = 3
 }
 
 # Create 3 Kubernetes worker nodes (using ubuntu template)
-resource "cloudstack_instance" "kubernetes-worker-nodes" {
-  name               = "kubernetes-worker-node0${count.index}"
-  template           = "4c9f5519-730f-46cb-b292-4e73ca578947"
-  service_offering   = "Small"
-  root_disk_size     = 20
-  zone               = "at-vie-1"
-  security_group_ids = ["${cloudstack_security_group.kubernetes-worker-nodes-security-group.id}"]
-  keypair            = "${cloudstack_ssh_keypair.kubernetes-cluster-ssh-key.id}"
-  count              = 3
+resource "exoscale_compute" "kubernetes-worker-nodes" {
+  display_name    = "kubernetes-worker-node0${count.index}"
+  zone            = "at-vie-1"
+  template        = "Linux Ubuntu 18.04 LTS 64-bit"
+  size            = "Small"
+  disk_size       = 20
+  ip6             = false
+  key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-ssh-key.id}"
+  security_groups = ["${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.name}", "${exoscale_security_group.kubernetes-worker-nodes-security-group.name}"]
+  state           = "Running"
+
+  tags {
+    env                = "production"
+    kubernetes-cluster = "kubernetes-worker"
+  }
+
+  count = 3
 }
 
-# Create 3 etcd nodes
-resource "cloudstack_instance" "kubernetes-etcd-nodes" {
-  name               = "kubernetes-etcd-node0${count.index}"
-  template           = "4c9f5519-730f-46cb-b292-4e73ca578947"
-  service_offering   = "Small"
-  root_disk_size     = 10
-  zone               = "at-vie-1"
-  security_group_ids = ["${cloudstack_security_group.etcd-nodes-security-group.id}"]
-  keypair            = "${cloudstack_ssh_keypair.kubernetes-cluster-ssh-key.id}"
-  count              = 3
+# Create 3 etcd nodes (using ubuntu template)
+resource "exoscale_compute" "kubernetes-etcd-nodes" {
+  display_name    = "kubernetes-etcd-node0${count.index}"
+  zone            = "at-vie-1"
+  template        = "Linux Ubuntu 18.04 LTS 64-bit"
+  size            = "Small"
+  disk_size       = 10
+  ip6             = false
+  key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-ssh-key.id}"
+  security_groups = ["${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.name}", "${exoscale_security_group.etcd-nodes-security-group.name}"]
+  state           = "Running"
+
+  tags {
+    env                = "production"
+    kubernetes-cluster = "kubernetes-worker"
+  }
+
+  count = 3
 }
 
 # Template for ansible inventory
@@ -116,15 +156,15 @@ data "template_file" "ansible-inventory" {
   template = "${file("ansible-inventory.tpl")}"
 
   vars {
-    kubernetes_master_node00_ip = "${cloudstack_instance.kubernetes-master-nodes.*.ip_address[0]}"
-    kubernetes_master_node01_ip = "${cloudstack_instance.kubernetes-master-nodes.*.ip_address[1]}"
-    kubernetes_master_node02_ip = "${cloudstack_instance.kubernetes-master-nodes.*.ip_address[2]}"
-    kubernetes_worker_node00_ip = "${cloudstack_instance.kubernetes-worker-nodes.*.ip_address[0]}"
-    kubernetes_worker_node01_ip = "${cloudstack_instance.kubernetes-worker-nodes.*.ip_address[1]}"
-    kubernetes_worker_node02_ip = "${cloudstack_instance.kubernetes-worker-nodes.*.ip_address[2]}"
-    etcd_node00_ip              = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[0]}"
-    etcd_node01_ip              = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[1]}"
-    etcd_node02_ip              = "${cloudstack_instance.kubernetes-etcd-nodes.*.ip_address[2]}"
+    kubernetes_master_node00_ip = "${exoscale_compute.kubernetes-master-nodes.*.ip_address[0]}"
+    kubernetes_master_node01_ip = "${exoscale_compute.kubernetes-master-nodes.*.ip_address[1]}"
+    kubernetes_master_node02_ip = "${exoscale_compute.kubernetes-master-nodes.*.ip_address[2]}"
+    kubernetes_worker_node00_ip = "${exoscale_compute.kubernetes-worker-nodes.*.ip_address[0]}"
+    kubernetes_worker_node01_ip = "${exoscale_compute.kubernetes-worker-nodes.*.ip_address[1]}"
+    kubernetes_worker_node02_ip = "${exoscale_compute.kubernetes-worker-nodes.*.ip_address[2]}"
+    etcd_node00_ip              = "${exoscale_compute.kubernetes-etcd-nodes.*.ip_address[0]}"
+    etcd_node01_ip              = "${exoscale_compute.kubernetes-etcd-nodes.*.ip_address[1]}"
+    etcd_node02_ip              = "${exoscale_compute.kubernetes-etcd-nodes.*.ip_address[2]}"
   }
 }
 
