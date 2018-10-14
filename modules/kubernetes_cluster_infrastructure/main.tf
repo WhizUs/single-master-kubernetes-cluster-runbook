@@ -3,6 +3,12 @@ resource "exoscale_ssh_keypair" "kubernetes-cluster-ssh-key" {
   public_key = "${file("~/.ssh/id_rsa.pub")}"
 }
 
+resource "exoscale_affinity" "kubernetes-nodes" {
+  name        = "kubernetes-nodes"
+  description = "Up to 8 kubernetes nodes are placed on different hypervisors"
+  type        = "host anti-affinity"
+}
+
 # Create security group for ssh access nodes
 resource "exoscale_security_group" "kubernetes-cluster-ssh-access-security-group" {
   name        = "kubernetes-cluster-ssh-access-security-group"
@@ -101,7 +107,9 @@ resource "exoscale_compute" "kubernetes-master-nodes" {
   ip6             = false
   key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-ssh-key.id}"
   security_groups = ["${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.name}", "${exoscale_security_group.kubernetes-master-nodes-security-group.name}"]
-  state           = "Running"
+  affinity_groups = ["${exoscale_affinity.kubernetes-nodes.name}"]
+
+  state = "Running"
 
   tags {
     env                = "production"
@@ -121,6 +129,7 @@ resource "exoscale_compute" "kubernetes-worker-nodes" {
   ip6             = false
   key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-ssh-key.id}"
   security_groups = ["${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.name}", "${exoscale_security_group.kubernetes-worker-nodes-security-group.name}"]
+  affinity_groups = ["${exoscale_affinity.kubernetes-nodes.name}"]
   state           = "Running"
 
   tags {
