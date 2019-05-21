@@ -1,27 +1,20 @@
-- name: Install apt-transport-https and curl
-  apt:
-    name: "{{ packages }}"
-    update_cache: yes
-    cache_valid_time: 3600
-  vars:
-    packages:
-    - apt-transport-https
-    - curl
-- name: Add Apt key for kubernetes Packages
+- name: add gpg key for kubernetes packages
   apt_key:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     state: present
-- name: Deploy service configuration
-  template: src=kubernetes.list dest=/etc/apt/sources.list.d/kubernetes.list
+- name: add kubernetes repository as an apt repository
+  apt_repository:
+    repo: deb  http://apt.kubernetes.io/  kubernetes-xenial  main
+    state: present
 - name: install kubelet, kubeadm and kubectl
   apt:
     name: "{{ packages }}"
     update_cache: yes
   vars:
     packages:
-    - kubelet
-    - kubeadm
-    - kubectl
+    - kubeadm=1.14.1-00
+    - kubelet=1.14.1-00
+    - kubectl=1.14.1-00
 - name: mark packages as hold
   command: apt-mark hold kubelet kubeadm kubectl
   

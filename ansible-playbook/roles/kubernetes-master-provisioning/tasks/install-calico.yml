@@ -1,0 +1,5 @@
+- name: install rbac for calico
+  command: kubectl apply -f https://tinyurl.com/yb4xturm
+- name: install calico
+  command: kubectl apply -f https://tinyurl.com/y8lvqc9g
+

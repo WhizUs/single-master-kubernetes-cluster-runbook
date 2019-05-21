@@ -1,8 +1,0 @@
----
-- hosts: [etcd_nodes]
-  become: true
-  become_user: root
-  become_method: sudo
-  roles:
-    - kubernetes-node-init-setup
-    - etcd-provisioning

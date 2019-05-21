@@ -1,2 +1,0 @@
-- name: deploy kubeadmcfg to tmp folder
-  template: src=kubeadmcfg.yaml dest=/tmp/kubeadmcfg.yaml

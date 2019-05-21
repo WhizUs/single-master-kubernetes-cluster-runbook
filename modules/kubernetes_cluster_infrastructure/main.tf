@@ -1,40 +1,52 @@
-resource "exoscale_ssh_keypair" "kubernetes-cluster-ssh-key" {
-  name       = "kubernetes-cluster-ssh-key"
+resource "exoscale_ssh_keypair" "kubernetes-cluster-runbook-ssh-key" {
+  name       = "kubernetes-cluster-runbook-ssh-key"
   public_key = "${file("~/.ssh/kubernetes-cluster-ssh-key-rsa.pub")}"
 }
 
-resource "exoscale_affinity" "kubernetes-nodes" {
-  name        = "kubernetes-nodes"
-  description = "Up to 8 kubernetes nodes are placed on different hypervisors"
+resource "exoscale_affinity" "kubernetes-cluster-runbook-kubernetes-nodes" {
+  name        = "kubernetes-cluster-runbook-kubernetes-nodes"
+  description = "created by kubernetes-cluster-runbook - up to 8 kubernetes nodes are placed on different hypervisors"
   type        = "host anti-affinity"
 }
 
 # Create security group for ssh access nodes
-resource "exoscale_security_group" "kubernetes-cluster-ssh-access-security-group" {
-  name        = "kubernetes-cluster-ssh-access-security-group"
-  description = "Security Group for ssh access."
+resource "exoscale_security_group" "kubernetes-cluster-runbook-ssh-access-security-group" {
+  name        = "kubernetes-cluster-runbook-ssh-access-security-group"
+  description = "created by kubernetes-cluster-runbook - security group to access machines over ssh"
 }
 
 # Create security group for master nodes
-resource "exoscale_security_group" "kubernetes-master-nodes-security-group" {
-  name        = "kubernetes-master-nodes-security-group"
-  description = "Security Group for kubernetes master nodes."
+resource "exoscale_security_group" "kubernetes-cluster-runbook-master-nodes-security-group" {
+  name        = "kubernetes-cluster-runbook-master-nodes-security-group"
+  description = "created by kubernetes-cluster-runbook - opens necessary ports for kubernetes master nodes"
 }
 
 # Create a security group for worker nodes
-resource "exoscale_security_group" "kubernetes-worker-nodes-security-group" {
-  name        = "kubernetes-worker-nodes-security-group"
-  description = "Security Group for kubernetes worker nodes."
+resource "exoscale_security_group" "kubernetes-cluster-runbook-worker-nodes-security-group" {
+  name        = "kubernetes-cluster-runbook-worker-nodes-security-group"
+  description = "created by kubernetes-cluster-runbook - opens necessary ports for kubernetes worker nodes"
 }
 
 # Create a security group for etcd nodes
-resource "exoscale_security_group" "etcd-nodes-security-group" {
-  name        = "etcd-nodes-security-group"
-  description = "Allow access to etcd nodes."
+resource "exoscale_security_group" "kubernetes-cluster-runbook-etcd-nodes-security-group" {
+  name        = "kubernetes-cluster-runbook-etcd-nodes-security-group"
+  description = "created by kubernetes-cluster-runbook - opens necessary ports for etcd nodes"
 }
 
-resource "exoscale_security_group_rule" "kubernetes-cluster-ssh-access-security-group-nodeports" {
-  security_group_id = "${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.id}"
+# Create a security group for calico network
+resource "exoscale_security_group" "kubernetes-cluster-runbook-calico-network-security-group" {
+  name        = "kubernetes-cluster-runbook-calico-network-security-group"
+  description = "created by kubernetes-cluster-runbook - opens necessary ports to enable calico networking"
+}
+
+# Create a security group for http(s) access
+resource "exoscale_security_group" "kubernetes-cluster-runbook-http-security-group" {
+  name        = "kubernetes-cluster-runbook-http-security-group"
+  description = "created by kubernetes-cluster-runbook - allow http/s access"
+}
+
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-ssh-access-security-group-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-ssh-access-security-group.id}"
   protocol          = "TCP"
   type              = "INGRESS"
   cidr              = "0.0.0.0/0"
@@ -44,8 +56,8 @@ resource "exoscale_security_group_rule" "kubernetes-cluster-ssh-access-security-
 
 # Check ports are needed for master nodes: 
 # https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-resource "exoscale_security_group_rule" "kubernetes-master-nodes-security-group-api-server" {
-  security_group_id = "${exoscale_security_group.kubernetes-master-nodes-security-group.id}"
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-master-nodes-security-group-api-server-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-master-nodes-security-group.id}"
   protocol          = "TCP"
   type              = "INGRESS"
   cidr              = "0.0.0.0/0"
@@ -55,8 +67,8 @@ resource "exoscale_security_group_rule" "kubernetes-master-nodes-security-group-
 
 # Check ports are needed for master nodes: 
 # https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-resource "exoscale_security_group_rule" "kubernetes-master-nodes-security-group-master-services" {
-  security_group_id = "${exoscale_security_group.kubernetes-master-nodes-security-group.id}"
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-master-nodes-security-group-master-service-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-master-nodes-security-group.id}"
   protocol          = "TCP"
   type              = "INGRESS"
   cidr              = "0.0.0.0/0"
@@ -66,8 +78,8 @@ resource "exoscale_security_group_rule" "kubernetes-master-nodes-security-group-
 
 # Check ports are needed for worker nodes: 
 # https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-resource "exoscale_security_group_rule" "kubernetes-worker-nodes-security-group-kubelet-api" {
-  security_group_id = "${exoscale_security_group.kubernetes-worker-nodes-security-group.id}"
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-worker-nodes-security-group-kubelet-api-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-worker-nodes-security-group.id}"
   protocol          = "TCP"
   type              = "INGRESS"
   cidr              = "0.0.0.0/0"
@@ -77,8 +89,8 @@ resource "exoscale_security_group_rule" "kubernetes-worker-nodes-security-group-
 
 # Check ports are needed for worker nodes: 
 # https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-resource "exoscale_security_group_rule" "kubernetes-worker-nodes-security-group-nodeports" {
-  security_group_id = "${exoscale_security_group.kubernetes-worker-nodes-security-group.id}"
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-worker-nodes-security-group-nodeports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-worker-nodes-security-group.id}"
   protocol          = "TCP"
   type              = "INGRESS"
   cidr              = "0.0.0.0/0"
@@ -88,8 +100,8 @@ resource "exoscale_security_group_rule" "kubernetes-worker-nodes-security-group-
 
 # Check ports are needed for etcd nodes: 
 # https://kubernetes.io/docs/setup/independent/install-kubeadm/#check-required-ports
-resource "exoscale_security_group_rule" "etcd-nodes-security-group-client-api" {
-  security_group_id = "${exoscale_security_group.etcd-nodes-security-group.id}"
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-etcd-nodes-security-group-client-api-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-etcd-nodes-security-group.id}"
   protocol          = "TCP"
   type              = "INGRESS"
   cidr              = "0.0.0.0/0"
@@ -97,92 +109,128 @@ resource "exoscale_security_group_rule" "etcd-nodes-security-group-client-api" {
   end_port          = 2380
 }
 
-# Create 3 Kubernetes master nodes (using ubuntu template)
-resource "exoscale_compute" "kubernetes-master-nodes" {
-  display_name    = "kubernetes-master-node0${count.index}"
+# Check ports are needed for calico network: 
+# https://docs.projectcalico.org/v3.5/getting-started/kubernetes/requirements
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-calico-network-security-group-bgp-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-calico-network-security-group.id}"
+  protocol          = "TCP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 179
+  end_port          = 179
+}
+
+# Check ports are needed for calico network: 
+# https://docs.projectcalico.org/v3.5/getting-started/kubernetes/requirements
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-calico-network-security-group-ipip-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-calico-network-security-group.id}"
+  protocol          = "IPIP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+}
+
+# Check ports are needed for calico network: 
+# https://docs.projectcalico.org/v3.5/getting-started/kubernetes/requirements
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-calico-network-security-group-typha-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-calico-network-security-group.id}"
+  protocol          = "TCP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 5473
+  end_port          = 5473
+}
+
+# Check ports are needed for calico network: 
+# https://docs.projectcalico.org/v3.5/getting-started/kubernetes/requirements
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-calico-network-security-group-flannel-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-calico-network-security-group.id}"
+  protocol          = "UDP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 4789
+  end_port          = 4789
+}
+
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-http-security-group-http-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-http-security-group.id}"
+  protocol          = "UDP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 80
+  end_port          = 80
+}
+
+resource "exoscale_security_group_rule" "kubernetes-cluster-runbook-http-security-group-https-ports" {
+  security_group_id = "${exoscale_security_group.kubernetes-cluster-runbook-http-security-group.id}"
+  protocol          = "UDP"
+  type              = "INGRESS"
+  cidr              = "0.0.0.0/0"
+  start_port        = 443
+  end_port          = 443
+}
+
+# Creates 1 Kubernetes master nodes (using ubuntu template)
+resource "exoscale_compute" "kubernetes-cluster-runbook-master-nodes" {
+  display_name    = "kubernetes-cluster-runbook-master-node0${count.index}"
   zone            = "at-vie-1"
   template        = "Linux Ubuntu 18.04 LTS 64-bit"
-  size            = "Small"
-  disk_size       = 20
+  size            = "Large"
+  disk_size       = 50
   ip6             = false
-  key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-ssh-key.id}"
-  security_groups = ["${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.name}", "${exoscale_security_group.kubernetes-master-nodes-security-group.name}"]
-  affinity_groups = ["${exoscale_affinity.kubernetes-nodes.name}"]
-
-  state = "Running"
+  key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-runbook-ssh-key.id}"
+  security_groups = ["${exoscale_security_group.kubernetes-cluster-runbook-calico-network-security-group.name}", "${exoscale_security_group.kubernetes-cluster-runbook-etcd-nodes-security-group.name}", "${exoscale_security_group.kubernetes-cluster-runbook-http-security-group.name}", "${exoscale_security_group.kubernetes-cluster-runbook-master-nodes-security-group.name}", "${exoscale_security_group.kubernetes-cluster-runbook-ssh-access-security-group.name}"]
+  affinity_groups = ["${exoscale_affinity.kubernetes-cluster-runbook-kubernetes-nodes.name}"]
+  state           = "Running"
 
   tags {
-    env                = "production"
-    kubernetes-cluster = "kubernetes-master"
+    env                        = "production"
+    kubernetes-cluster-runbook = "kubernetes-master"
   }
 
   count = 1
 }
 
 # Create 3 Kubernetes worker nodes (using ubuntu template)
-resource "exoscale_compute" "kubernetes-worker-nodes" {
-  display_name    = "kubernetes-worker-node0${count.index}"
+resource "exoscale_compute" "kubernetes-cluster-runbook-worker-nodes" {
+  display_name    = "kubernetes-cluster-runbook-worker-node0${count.index}"
   zone            = "at-vie-1"
   template        = "Linux Ubuntu 18.04 LTS 64-bit"
-  size            = "Small"
-  disk_size       = 20
+  size            = "Large"
+  disk_size       = 50
   ip6             = false
-  key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-ssh-key.id}"
-  security_groups = ["${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.name}", "${exoscale_security_group.kubernetes-worker-nodes-security-group.name}"]
-  affinity_groups = ["${exoscale_affinity.kubernetes-nodes.name}"]
+  key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-runbook-ssh-key.id}"
+  security_groups = ["${exoscale_security_group.kubernetes-cluster-runbook-calico-network-security-group.name}", "${exoscale_security_group.kubernetes-cluster-runbook-worker-nodes-security-group.name}", "${exoscale_security_group.kubernetes-cluster-runbook-ssh-access-security-group.name}"]
+  affinity_groups = ["${exoscale_affinity.kubernetes-cluster-runbook-kubernetes-nodes.name}"]
   state           = "Running"
 
   tags {
-    env                = "production"
-    kubernetes-cluster = "kubernetes-worker"
-  }
-
-  count = 3
-}
-
-# Create 3 etcd nodes (using ubuntu template)
-resource "exoscale_compute" "kubernetes-etcd-nodes" {
-  display_name    = "kubernetes-etcd-node0${count.index}"
-  zone            = "at-vie-1"
-  template        = "Linux Ubuntu 18.04 LTS 64-bit"
-  size            = "Small"
-  disk_size       = 10
-  ip6             = false
-  key_pair        = "${exoscale_ssh_keypair.kubernetes-cluster-ssh-key.id}"
-  security_groups = ["${exoscale_security_group.kubernetes-cluster-ssh-access-security-group.name}", "${exoscale_security_group.etcd-nodes-security-group.name}"]
-  state           = "Running"
-
-  tags {
-    env                = "production"
-    kubernetes-cluster = "kubernetes-worker"
+    env                        = "production"
+    kubernetes-cluster-runbook = "kubernetes-worker"
   }
 
   count = 3
 }
 
 # Template for ansible inventory
-data "template_file" "ansible-inventory" {
+data "template_file" "kubernetes-cluster-runbook-ansible-inventory" {
   template = "${file("ansible-inventory.tpl")}"
 
   vars {
-    kubernetes_master_node00_ip = "${exoscale_compute.kubernetes-master-nodes.*.ip_address[0]}"
-    kubernetes_worker_node00_ip = "${exoscale_compute.kubernetes-worker-nodes.*.ip_address[0]}"
-    kubernetes_worker_node01_ip = "${exoscale_compute.kubernetes-worker-nodes.*.ip_address[1]}"
-    kubernetes_worker_node02_ip = "${exoscale_compute.kubernetes-worker-nodes.*.ip_address[2]}"
-    etcd_node00_ip              = "${exoscale_compute.kubernetes-etcd-nodes.*.ip_address[0]}"
-    etcd_node01_ip              = "${exoscale_compute.kubernetes-etcd-nodes.*.ip_address[1]}"
-    etcd_node02_ip              = "${exoscale_compute.kubernetes-etcd-nodes.*.ip_address[2]}"
+    kubernetes_master_node00_ip = "${exoscale_compute.kubernetes-cluster-runbook-master-nodes.*.ip_address[0]}"
+    kubernetes_worker_node00_ip = "${exoscale_compute.kubernetes-cluster-runbook-worker-nodes.*.ip_address[0]}"
+    kubernetes_worker_node01_ip = "${exoscale_compute.kubernetes-cluster-runbook-worker-nodes.*.ip_address[1]}"
+    kubernetes_worker_node02_ip = "${exoscale_compute.kubernetes-cluster-runbook-worker-nodes.*.ip_address[2]}"
   }
 }
 
 # Create inventory file
-resource "null_resource" "create-ansible-inventory" {
+resource "null_resource" "kubernetes-cluster-runbook-create-ansible-inventory" {
   # Changes to any instance of the cluster requires re-provisioning
   triggers {
-    template = "${data.template_file.ansible-inventory.rendered}"
+    template = "${data.template_file.kubernetes-cluster-runbook-ansible-inventory.rendered}"
   }
 
   provisioner "local-exec" {
-    command = "echo \"${data.template_file.ansible-inventory.rendered}\" > inventory"
+    command = "echo \"${data.template_file.kubernetes-cluster-runbook-ansible-inventory.rendered}\" > inventory"
   }
 }

@@ -1,9 +1,0 @@
-#- name: Create directory that contains the etcd service configuration
-#  file: path=/etc/systemd/system/kubelet.service.d state=directory mode=0755
-- name: deploy etcd service configuration
-  template: src=20-etcd-service-manager.conf dest=/etc/systemd/system/kubelet.service.d/20-etcd-service-manager.conf
-- name: reload systemd deamon and restart kubelet
-  systemd:
-    name: kubelet
-    daemon_reload: yes
-    state: restarted

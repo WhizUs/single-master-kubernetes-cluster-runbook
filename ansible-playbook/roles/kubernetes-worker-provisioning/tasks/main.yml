@@ -1,3 +1,3 @@
 ---
   - include_tasks: copy-kubeadm-join-command.yml
- # - include_tasks: connect-to-master-node.yml
+  - include_tasks: connect-to-master-node.yml
