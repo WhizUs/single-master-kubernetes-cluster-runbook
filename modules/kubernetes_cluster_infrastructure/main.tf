@@ -1,6 +1,6 @@
 resource "exoscale_ssh_keypair" "kubernetes-cluster-ssh-key" {
   name       = "kubernetes-cluster-ssh-key"
-  public_key = "${file("~/.ssh/id_rsa.pub")}"
+  public_key = "${file("~/.ssh/kubernetes-cluster-ssh-key-rsa.pub")}"
 }
 
 resource "exoscale_affinity" "kubernetes-nodes" {
@@ -116,7 +116,7 @@ resource "exoscale_compute" "kubernetes-master-nodes" {
     kubernetes-cluster = "kubernetes-master"
   }
 
-  count = 3
+  count = 1
 }
 
 # Create 3 Kubernetes worker nodes (using ubuntu template)
@@ -166,8 +166,6 @@ data "template_file" "ansible-inventory" {
 
   vars {
     kubernetes_master_node00_ip = "${exoscale_compute.kubernetes-master-nodes.*.ip_address[0]}"
-    kubernetes_master_node01_ip = "${exoscale_compute.kubernetes-master-nodes.*.ip_address[1]}"
-    kubernetes_master_node02_ip = "${exoscale_compute.kubernetes-master-nodes.*.ip_address[2]}"
     kubernetes_worker_node00_ip = "${exoscale_compute.kubernetes-worker-nodes.*.ip_address[0]}"
     kubernetes_worker_node01_ip = "${exoscale_compute.kubernetes-worker-nodes.*.ip_address[1]}"
     kubernetes_worker_node02_ip = "${exoscale_compute.kubernetes-worker-nodes.*.ip_address[2]}"

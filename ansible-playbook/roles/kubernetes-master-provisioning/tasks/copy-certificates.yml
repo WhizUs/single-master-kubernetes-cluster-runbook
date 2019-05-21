@@ -3,14 +3,14 @@
   file: path=/etc/kubernetes/pki/etcd/ state=directory mode=0755
 - name: copy ca cert to master nodes
   copy:
-    src: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/ca.crt
+    src: /Users/erik/Development/opensource/kubernetes-cluster-runbook/certs/ca.crt
     dest: /etc/kubernetes/pki/etcd/ca.crt
     mode: 0600
     owner: root
     group: root
 - name: copy etcd certificates to master nodes
   copy:
-    src: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/apiserver-etcd-client.crt/{{item}}/etc/kubernetes/pki/apiserver-etcd-client.crt
+    src: /Users/erik/Development/opensource/kubernetes-cluster-runbook/certs/apiserver-etcd-client.crt/{{item}}/etc/kubernetes/pki/apiserver-etcd-client.crt
     dest: /etc/kubernetes/pki/apiserver-etcd-client0{{item}}.crt
     mode: 0600
     owner: root
@@ -18,7 +18,7 @@
   with_items: "{{ groups.etcd_nodes }}"
 - name: copy etcd keys to master nodes
   copy:
-    src: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/apiserver-etcd-client.key/{{item}}/etc/kubernetes/pki/apiserver-etcd-client.key
+    src: /Users/erik/Development/opensource/kubernetes-cluster-runbook/certs/apiserver-etcd-client.key/{{item}}/etc/kubernetes/pki/apiserver-etcd-client.key
     dest: /etc/kubernetes/pki/apiserver-etcd-client0{{item}}.key
     mode: 0600
     owner: root

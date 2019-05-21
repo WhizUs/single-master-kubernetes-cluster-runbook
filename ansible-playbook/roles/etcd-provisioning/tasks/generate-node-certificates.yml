@@ -9,8 +9,8 @@
 - name: copy apiserver-etcd-client cert to local
   fetch:
     src: /etc/kubernetes/pki/apiserver-etcd-client.crt
-    dest: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/apiserver-etcd-client.crt
+    dest: /Users/erik/Development/opensource/kubernetes-cluster-runbook/certs/apiserver-etcd-client.crt
 - name: copy apiserver-etcd-client key to local
   fetch:
     src: /etc/kubernetes/pki/apiserver-etcd-client.key
-    dest: /Users/erik/Programming/kubernetes-runbook/kubernetes-cluster-runbook/certs/apiserver-etcd-client.key
+    dest: /Users/erik/Development/opensource/kubernetes-cluster-runbook/certs/apiserver-etcd-client.key
