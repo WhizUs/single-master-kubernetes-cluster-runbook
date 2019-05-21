@@ -30,6 +30,7 @@ Run following commands to install the current exoscale provider
      mkdir -p $GOPATH/src/github.com/exoscale; cd $GOPATH/src/github.com/exoscale
      git clone git@github.com:exoscale/terraform-provider-exoscale
      cd $GOPATH/src/github.com/exoscale/terraform-provider-exoscale
+     make build
 
 After the build the binary terraform-provider-exoscale is available in $GOPATH/bin.
 
