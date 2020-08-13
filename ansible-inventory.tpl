@@ -5,8 +5,6 @@ ${kubernetes_master_node00_ip}
 
 [kubernetes_nodes]
 ${kubernetes_worker_node00_ip}
-${kubernetes_worker_node01_ip}
-${kubernetes_worker_node02_ip}
 
 [kubernetes_master:vars]
 ansible_user=ubuntu

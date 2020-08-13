@@ -182,7 +182,7 @@ resource "exoscale_compute" "kubernetes-cluster-runbook-master-nodes" {
   affinity_groups = ["${exoscale_affinity.kubernetes-cluster-runbook-kubernetes-nodes.name}"]
   state           = "Running"
 
-  tags {
+  tags = {
     env                        = "production"
     kubernetes-cluster-runbook = "kubernetes-master"
   }
@@ -203,30 +203,28 @@ resource "exoscale_compute" "kubernetes-cluster-runbook-worker-nodes" {
   affinity_groups = ["${exoscale_affinity.kubernetes-cluster-runbook-kubernetes-nodes.name}"]
   state           = "Running"
 
-  tags {
+  tags = {
     env                        = "production"
     kubernetes-cluster-runbook = "kubernetes-worker"
   }
 
-  count = 3
+  count = 1
 }
 
 # Template for ansible inventory
 data "template_file" "kubernetes-cluster-runbook-ansible-inventory" {
   template = "${file("ansible-inventory.tpl")}"
 
-  vars {
+  vars = {
     kubernetes_master_node00_ip = "${exoscale_compute.kubernetes-cluster-runbook-master-nodes.*.ip_address[0]}"
     kubernetes_worker_node00_ip = "${exoscale_compute.kubernetes-cluster-runbook-worker-nodes.*.ip_address[0]}"
-    kubernetes_worker_node01_ip = "${exoscale_compute.kubernetes-cluster-runbook-worker-nodes.*.ip_address[1]}"
-    kubernetes_worker_node02_ip = "${exoscale_compute.kubernetes-cluster-runbook-worker-nodes.*.ip_address[2]}"
   }
 }
 
 # Create inventory file
 resource "null_resource" "kubernetes-cluster-runbook-create-ansible-inventory" {
   # Changes to any instance of the cluster requires re-provisioning
-  triggers {
+  triggers = {
     template = data.template_file.kubernetes-cluster-runbook-ansible-inventory.rendered
   }
 
