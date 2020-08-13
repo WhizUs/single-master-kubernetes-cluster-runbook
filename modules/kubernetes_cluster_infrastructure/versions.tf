@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     exoscale = {
-      source = "terraform-providers/exoscale"
+      source = "exoscale/exoscale"
     }
     null = {
       source = "hashicorp/null"

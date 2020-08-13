@@ -41,7 +41,7 @@ Now you need to place the binary into .terraform.d/plugins and to run `terraform
 Before contribution run
 
       terraform fmt
-      terraform validate -var-file='./exoscale.tfvars'
+      terraform validate
 
 ## Clean up
 
